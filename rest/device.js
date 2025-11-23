@@ -3,7 +3,6 @@ import Device from "../model/device.js";
 import User from "../model/user.js";
 import verifyAuth from "../middleware/verifyAuth.js";
 
-
 const deviceRouter = express.Router();
 
 deviceRouter.post("/new", verifyAuth, async (req, res) => {
@@ -14,7 +13,7 @@ deviceRouter.post("/new", verifyAuth, async (req, res) => {
         const devicePayload = {
             name: req.body.name,
             image: req.body.image,
-            active: true
+            active: truei
         };
 
         const newDevice = await Device.create(devicePayload);

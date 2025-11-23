@@ -9,11 +9,13 @@ import deviceRouter from './rest/device.js';
 import forumRouter from './rest/forum.js';
 import registerRouter from "./rest/register.js";
 import loginRouter from './rest/login.js';
+import cors from 'cors';
 
 const app = express();
 
 app.use(express.json());
 app.use(methodOverride("_method"));
+app.use(cors())
 dotenv.config();
 
 async function connect() {

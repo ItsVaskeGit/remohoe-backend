@@ -8,46 +8,41 @@ const forumRouter = express.Router();
 
 forumRouter.get("/", verifyAuth, async (req, res) => {
 
-    const threads = Thread.find({});
+    const threads = await Thread.find();
 
     res.json(threads.map((thread) => {
         return {
             id: thread.id,
             name: thread.name,
-            startedAt: thread.startedAt,
+            startedBy: thread.startedBy.toString(),
+            startedAt: thread.startDate,
             active: thread.active
         }
     }));
 });
 
-forumRouter.get("/thread/{threadId}", verifyAuth, async (req, res) => {
+forumRouter.get("/thread/:threadId", verifyAuth, async (req, res) => {
 
     const thread = await Thread.findById(req.params.threadId);
 
     const startedBy = User.findById(thread.startedBy.toString());
 
-    const comments = [];
+    let comments = await Comment.find({ _id: { $in: thread.comments}});
 
-    thread.comments.forEach(async (entry) => {
-        const comment = await Comment.findById(entry.toString());
-
-        comments.push(comment);
-    });
-
-    const constructedComments = comments.map(async (entry) => {
-        const postedBy = await User.findById(entry.user.toString());
+    const constructedComments = comments.map((entry) => {
         return {
             id: entry.id,
-            user: postedBy.username,
+            user: entry.user,
             commentDate: entry.commentDate,
             data: entry.data
         }
     });
 
     const completeThread = {
+        id: thread.id,
         name: thread.name,
         startDate: thread.startDate,
-        startedBy: startedBy,
+        startedBy: thread.startedBy,
         active: thread.active,
         comments: constructedComments
     }
@@ -70,25 +65,20 @@ forumRouter.post("/new", verifyAuth, async (req, res) => {
 
         const newThread = await Thread.create(newThreadPayload);
 
-        res.status(201).json(newThread.map((entry) => {
-            return {
-                id: entry.id,
-                name: entry.name
-            }
-        }))
+        res.status(201).json(newThread);
 
     }else {
-        res.status(401).json("Not logged in properly.")
+        res.status(401).json({message: "Not logged in properly."})
     }
 });
 
-forumRouter.put("/thread/{threadId}/new", verifyAuth, async (req, res) => {
+forumRouter.put("/thread/:threadId/new", verifyAuth, async (req, res) => {
 
     const user = await User.findById(req.user._id);
 
     const thread = await Thread.findById(req.params.threadId);
 
-    if(user) {
+    if(!user) {
         res.status(401).json("Not logged in properly.");
     }
 
@@ -100,17 +90,16 @@ forumRouter.put("/thread/{threadId}/new", verifyAuth, async (req, res) => {
         data: req.body.data,
         user: user.id,
         thread: thread.id,
-        commentDate: Date.now
+        commentDate: Date.now()
     };
 
     const newComment = await Comment.create(newCommentPayload);
 
-    res.status(201).json(newComment.map((entry) => {
-        return {
-            id: entry.id.toString,
-            data: entry.data
-        }
-    }));
+    thread.comments.push(newComment.id);
+
+    await thread.save();
+
+    res.status(201).json(newComment);
 })
 
 export default forumRouter;

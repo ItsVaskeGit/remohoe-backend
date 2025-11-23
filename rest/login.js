@@ -22,12 +22,28 @@ loginRouter.post("/", async (req, res) => {
                 _id: user[0].id,
                 username: user[0].username
             }
-            res.status(200).json(jwt.sign(payload, jwtSecret));
+
+            const payloadToReturn = {
+                id: user[0].id,
+                token: jwt.sign(payload, jwtSecret)
+            }
+
+            res.status(200).json(payloadToReturn);
         }else {
-            res.status(401).json("Incorrect password.");
+
+            const payloadToReturn = {
+                message: "Incorrect password."
+            }
+
+            res.status(401).json(payloadToReturn);
         }
     }else {
-        res.status(404).json("User not found.");
+
+        const payloadToReturn = {
+            message: "User not found."
+        }
+
+        res.status(404).json(payloadToReturn);
     }
 });
 

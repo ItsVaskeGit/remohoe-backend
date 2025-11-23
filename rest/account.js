@@ -1,12 +1,27 @@
 import express from "express";
 import User from "../model/user.js";
 import bcrypt from "bcrypt";
+import verifyAuth from "../middleware/verifyAuth.js";
 
 const accountRouter = express.Router();
 
-accountRouter.put("/", async (req, res) => {
+accountRouter.get("/personal-data", verifyAuth, async (req, res) => {
 
-    const user = User.findById(req.user._id);
+    const user = await User.findById(req.user._id);
+
+    const payload = {
+        username: user.username,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email
+    };
+
+    res.json(payload);
+});
+
+accountRouter.put("/", verifyAuth, async (req, res) => {
+
+    const user = await User.findById(req.user._id);
 
     if(user) {
 

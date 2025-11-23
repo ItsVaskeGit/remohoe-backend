@@ -9,6 +9,6 @@ const threadData = new mongoose.Schema({
 });
 
 
-const Comment = mongoose.model('Thread', threadData);
+const Thread = mongoose.model('Thread', threadData);
 
-export default Comment;
+export default Thread;

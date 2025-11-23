@@ -13,7 +13,12 @@ registerRouter.post("/", async (req, res) => {
     console.log(existingUser)
 
     if(existingUser.length !== 0) {
-        res.json("User already exists.")
+
+        const payloadToReturn = {
+            message: "User already exists."
+        }
+
+        res.json(payloadToReturn);
     }else {
 
         const username = req.body.username;
